@@ -23,8 +23,6 @@ test.describe('Facebook Post Scraper', () => {
     const basePost = await lastPost({ page })
 
     post = parseBasePost(basePost.fullText, basePost.message)
-
-    // await hook.send(`${post.author} - ${post.date} ${post.message}`)
   })
 })
 
@@ -33,7 +31,18 @@ test.afterAll(async () => {
   if (!process.env.WEBHOOK_URL) {
     return
   }
+  if (!post.message) {
+    return await hook.error(
+      '**Error**',
+      `${post.author ?? 'Author'} - ${post.date ?? 'Date'}`,
+      'Error fetching post content'
+    )
+  }
   if (isInTimeAgo(post.date ?? '', process.env.FB_TIMEFRAME ?? '')) {
-    await hook.info('**Information**', `${post.author} - ${post.date}`, `${post.message}`);
+    return await hook.info(
+      '**Information**',
+      `${post.author} - ${post.date}`,
+      `${post.message}`
+    )
   }
 })
